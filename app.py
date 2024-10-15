@@ -34,4 +34,4 @@ if st.button("Summarize"):
             st.subheader("Summary")
             st.write(summary[0]['summary_text'])
         except Exception as e:
-            st.error(f"An error occurred during summarization: {str(e)}")
+            st.error(f"An error occurred during summarization: Try Shortening Text Length")
