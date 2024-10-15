@@ -1,26 +1,37 @@
 import streamlit as st
 from transformers import pipeline
 
-# Title of the Streamlit app
-st.title("Text Summarizer Bot")
-st.write("Enter text below to generate a summary:")
+# Title of the web app
+st.title("Text Summarizer")
 
-# Text input area for the user
-text_input = st.text_area("Your Text", height=200)
-
-# Load the summarization pipeline from Hugging Face
+# Function to load the summarization model
 @st.cache_resource
 def load_summarizer():
     return pipeline("summarization", model="facebook/bart-large-cnn")
 
+# Load the summarizer
 summarizer = load_summarizer()
 
-# Generate and display the summary when the user clicks the button
+# Text input from the user
+text_input = st.text_area("Enter the text you want to summarize:")
+
+# Button to trigger summarization
 if st.button("Summarize"):
-    if text_input.strip():  # Check if text is not empty
-        # Summarize the input text
-        summary = summarizer(text_input, max_length=150, min_length=30, do_sample=False)
-        st.write("**Summary:**")
-        st.write(summary[0]['summary_text'])
+    if not text_input.strip():
+        st.error("Input text cannot be empty. Please provide some text.")
+    elif len(text_input.split()) < 10:
+        st.error("Please enter a longer text for summarization.")
     else:
-        st.write("Please enter some text to summarize.")
+        try:
+            # Generate summary
+            summary = summarizer(
+                text_input, 
+                max_length=min(len(text_input.split()) * 2, 150),  # Dynamic max length
+                min_length=max(len(text_input.split()) // 2, 30),  # Dynamic min length
+                do_sample=False
+            )
+            # Display the summary
+            st.subheader("Summary")
+            st.write(summary[0]['summary_text'])
+        except Exception as e:
+            st.error(f"An error occurred during summarization: {str(e)}")
